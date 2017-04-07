@@ -32,18 +32,19 @@ See also NMEA2000 library.
 #include <CAN.h>
 #include "NMEA2000_mbed.h"
 
-CAN can1(PB_8, PB_9);    //  (Rx,Tx)  pins
+//*****************************************************************************
+//  Driver dependencies:
+extern CAN can1;                                                                // Low level CAN needs to be created for us as 'can1'
+extern Serial canSerial;                                                        // Where the serial IO will be directed to
 
- // CAN can1(MBED_CONF_APP_CAN1_RD, MBED_CONF_APP_CAN1_TD);
-//DigitalOut can1_SleepMode(PA_7);     // Use pin to control the sleep mode of can1
-DigitalOut can1_SleepMode(PA_7);     // Use pin to control the sleep mode of can1
 
-extern Serial pc;
+
 
 //*****************************************************************************
 tNMEA2000_mbed::tNMEA2000_mbed() : tNMEA2000()
 {
 }
+
 
 
 //*****************************************************************************
@@ -52,9 +53,18 @@ bool tNMEA2000_mbed::CANOpen()
 
     can1.frequency(250000);
 
-    can1_SleepMode = 0;         // Set the Sleep Mode to 0 or low or false... this makes sure the transceiver is on
+    #if defined(TARGET_STM)
+      //#error  Need to verify CAN packet order is kept,  comment out this Error once you are sure of your local environment.
+      #warning   Make sure file: targets/TARGET_STM/can_api.c   has been edited per  https://github.com/ARMmbed/mbed-os/pull/4121
 
-
+  #else
+      #error  Review code / drivers to assure sent CAN message packet order is kept
+      //  fastPacker in NMEA2000 requires that messages order be kept, as there is no ability to
+      //  recover from out-of-order messages.
+      //  If you received this error message, it means that the specific MBED CPU has not had its drivers reviewed
+      //  and there is a risk of out-of-order packets.  Please make changes there, or below in ::CANSendFrame
+      //  and  push the revised edits back to github.
+  #endif
 
 
 
@@ -81,10 +91,12 @@ bool tNMEA2000_mbed::CANSendFrame(unsigned long id, unsigned char len, const uns
 
     result=can1.write(output);
 
+
     if (wait_sent){
-	//---- Something must be done here to make sure packets are kept in as-sent order
-	#warning  CANSendFrame() is not assuring packet sent order is retained!
-	}
+	     //---- You can put something here to assure these special class of messages are indeed sent in FIFO order.
+       //   See above in ::CANOpen()
+
+	     }
 
     return result;
 }
@@ -96,14 +108,11 @@ bool tNMEA2000_mbed::CANGetFrame(unsigned long &id, unsigned char &len, unsigned
     bool HasFrame=false;
     CANMessage incoming;
 
-    if ( can1.read(incoming)) {           // check if data coming
+    if (can1.read(incoming)) {           // check if data coming
         id=incoming.id;
         len=incoming.len;
         for (int i=0; i<len && i<8; i++) buf[i]=incoming.data[i];
         HasFrame=true;
-
-           pc.printf("\r\n\nGOT ONE!!!!\r\n");
-
     }
 
     return HasFrame;
@@ -118,19 +127,26 @@ bool tNMEA2000_mbed::CANGetFrame(unsigned long &id, unsigned char &len, unsigned
 *
 *
 **********************************************************************/
-Serial pcx(SERIAL_TX, SERIAL_RX, 115200);                        // Likely /dev/ttyACM0
-
 
 int tmbedStream::read() {
-  return pcx.getc();
+
+  if (canSerial.readable())
+      return canSerial.getc();                                                // Something to read!  Go get it and return it.
+  else
+      return -1;                                                                // Nothing to read,
 }
 
+
 size_t tmbedStream::write(const uint8_t* data, size_t size) {
-  if (size > 0)
-    for (int i=0; i<size; i++)
-        pcx.putc(data[i]);
-  return size;
+  int i;
+
+  for (i=0; (i<size) && data[i];  i++)
+      canSerial.putc(data[i]);
+
+  return i;
 }
+
+
 
 
 void delay(const uint32_t ms)
@@ -141,5 +157,5 @@ void delay(const uint32_t ms)
 
 uint32_t millis(void)
 {
-    return(HAL_GetTick());
+    return HAL_GetTick();
 };

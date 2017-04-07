@@ -57,7 +57,8 @@ public:
 
 
 
-class tmbedStream : public N2kStream {
+//class Serial : public N2kStream {
+  class tmbedStream : public N2kStream {
 public:
    virtual int read();
    virtual size_t write(const uint8_t* data, size_t size);
