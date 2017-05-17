@@ -35,9 +35,6 @@ See also NMEA2000 library.
 //*****************************************************************************
 //  Driver dependencies:
 extern CAN can1;                                                                // Low level CAN needs to be created for us as 'can1'
-extern Serial canSerial;                                                        // Where the serial IO will be directed to
-
-
 
 
 //*****************************************************************************
@@ -130,8 +127,8 @@ bool tNMEA2000_mbed::CANGetFrame(unsigned long &id, unsigned char &len, unsigned
 
 int tmbedStream::read() {
 
-  if (canSerial.readable())
-      return canSerial.getc();                                                // Something to read!  Go get it and return it.
+  if (!feof(stdin))
+      return (getc(stdin));                                                 	// Something to read!  Go get it and return it.
   else
       return -1;                                                                // Nothing to read,
 }
@@ -141,7 +138,7 @@ size_t tmbedStream::write(const uint8_t* data, size_t size) {
   int i;
 
   for (i=0; (i<size) && data[i];  i++)
-      canSerial.putc(data[i]);
+     putc(data[i],stdout);
 
   return i;
 }

@@ -2,11 +2,11 @@
 #include <NMEA2000_CAN.h>                                       // This will automatically choose right CAN library and create suitable NMEA2000 object
 #include <N2kMessages.h>
 
-Serial pc(SERIAL_TX, SERIAL_RX, 115200);                        // Likely /dev/ttyACM0
+Serial pc(SERIAL_TX, SERIAL_RX, "pc", 115200);                        // Likely /dev/ttyACM0
+//Serial pc(PB_10, PB_11, "pc", 115200);                                // Open 'serial' port in UART-3 
 
 //---  Externial definitions needed by NMEA2000_mbed.cpp library
 CAN    can1(PB_8, PB_9);                                        //  (Rx,Tx)  pins
-Serial canSerial(SERIAL_TX, SERIAL_RX, 115200);                                 // 'Serial' port where text messages will go. Likely /dev/ttyACM0
 
 //DigitalOut can1_SleepMode(PA_7);                                // Use pin to control the sleep mode of can1 transeiver (if hardware is so configured)
 
@@ -58,7 +58,15 @@ void SendN2kBattery() {
 
 int main()
 {
+
+    freopen("/pc", "r", stdin);                                                 // retarget stdout to '/pc' device.
+    freopen("/pc", "w", stdout);                                                // retarget stdout to '/pc' device.
+    setvbuf (stdout, NULL, _IONBF, 0);                                          // No buffering on stdout, just send chars as they come.
+
+
+
     pc.printf("\r\n\nAbout to start   AGAIN!!!!\r\n");
+
   //  can1_SleepMode = 0;         // Set the Sleep Mode to 0 or low or false... this makes sure the transceiver is on
 
 
@@ -81,8 +89,8 @@ int main()
      // NMEA2000.SetDebugMode(tNMEA2000::dm_ClearText);     // Uncomment this, so you can test code without CAN bus chips on Arduino Mega
      NMEA2000.EnableForward(false);                      // Disable all msg forwarding to USB (=Serial)
 
-    ///!! HEY !! WHAT IS UP HERE!!!!
-     NMEA2000.SetForwardStream(&serStream);                        // Send serial streams to the 'pc'  (aka, USB serial) port.
+
+     NMEA2000.SetForwardStream(&serStream);                        // Send serial streams to the stdio port.
      //   NMEA2000.SetDebugMode(tNMEA2000::dm_ClearText);                             // Lets us see the debug messages on the terminal
     NMEA2000.SetForwardType(tNMEA2000::fwdt_Text);                              // Show in clear text
 

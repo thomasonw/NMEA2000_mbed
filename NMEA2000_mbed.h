@@ -38,8 +38,6 @@ See also NMEA2000 library.
 #include "mbed.h"
 
 
-//extern Serial pc;                                               // Likely /dev/ttyACM0
-
 void     delay(uint32_t ms);
 uint32_t millis(void);
 

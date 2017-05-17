@@ -16,13 +16,13 @@ Though any MBED with internal CAN controller should work, this has been tested p
 This library is in support of ttlappalainen's NMEA2000 library.  See the [NMEA2000](https://github.com/ttlappalainen/NMEA2000) for more examples.  Include this library in your build files. 
 
 `can1` must be defined and initialized externaly to this library
-`canSerial` must be defined and initialized externaly to this library
+
+All serial I/O will use `stdout` and `stdin`, see example for how to 'redirect' those to a different serial port.
 
 
 <br><br>
 ## Limitation
 
-At present serial text I/O  is fixed to `canSerial` which must be defined and initialized before NMEA2000.Open() is called.
 
 The CAN port is fixed to `can1`, which must be initialized before NMEA2000.Open() is called.  Make sure to also take care of any transceiver sleep pins, if your hardware is so designed.
   
