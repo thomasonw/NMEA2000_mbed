@@ -52,7 +52,7 @@ bool tNMEA2000_mbed::CANOpen()
 
     #if defined(TARGET_STM)
       //#error  Need to verify CAN packet order is kept,  comment out this Error once you are sure of your local environment.
-      #warning   Make sure file: targets/TARGET_STM/can_api.c   has been edited per  https://github.com/ARMmbed/mbed-os/pull/4121
+      #error   Make sure file: targets/TARGET_STM/can_api.c   has been edited per  https://github.com/ARMmbed/mbed-os/pull/4121
 
   #else
       #error  Review code / drivers to assure sent CAN message packet order is kept
