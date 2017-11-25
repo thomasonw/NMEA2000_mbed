@@ -1,4 +1,17 @@
 # NMEA2000_mbed
+===================================
+
+__UPDATE 11/24/2017__
+
+__This Library is being withdrawn, the underlying CAN API in MBED is insufficient to properly support NMEA2000, and there is no indication of that changing in the near future.__
+
+__Anyone using this library must proceed with great caution, and likely will need to provide a patch or custom CAN driver.__
+
+__cREF: https://github.com/ARMmbed/mbed-os/issues/4090 __
+
+=======================================
+
+~~
 
 This library provides support for MBED environments hosting ARM CPUs.  It allows access to the [NMEA2000](https://github.com/ttlappalainen/NMEA2000) library using MBED devices internal CAN controllers.
 
@@ -42,4 +55,4 @@ MBED libraries are of varying quality.  Review carefully the underlying MBED CAN
 
 ## Hardware
 
-Refer to the MBED CAN documentation for hardware configuration.
+Refer to the MBED CAN documentation for hardware configuration.~~
